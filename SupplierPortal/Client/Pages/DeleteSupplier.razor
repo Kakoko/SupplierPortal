@@ -1,0 +1,64 @@
+﻿@page "/supplier/delete/{Id:guid}"
+@using SupplierPortal.Shared.Models
+@inject HttpClient HttpClient
+@inject ISnackbar Snackbar
+@inject NavigationManager NavigationManager
+
+<PageTitle>Delete Supplier</PageTitle>
+<MudText Typo="Typo.h3" GutterBottom="true">Delete Supplier</MudText>
+
+
+
+<MudText Typo="Typo.h4" GutterBottom="true">Delete @supplier.Name ?</MudText>
+
+
+<MudSimpleTable Style="overflow-x: auto;">
+    <tbody>
+        <tr>
+            <td><strong>Name</strong></td>
+            <td><em>@supplier.Name</em></td>
+        </tr>
+        <tr>
+            <td><strong>Company</strong></td>
+            <td><em>@supplier.Company</em></td>
+        </tr>
+        <tr>
+            <td><strong>Email</strong></td>
+            <td><em>@supplier.Email</em></td>
+        </tr>
+        
+    </tbody>
+</MudSimpleTable>
+<br/>
+<br/>
+<MudPaper Class="d-flex flex-column flex-grow-1 gap-4" Elevation="0">
+    <MudButton @onclick="@(() => RemoveSupplier(supplier.Id))" Variant="Variant.Filled" Color="Color.Primary">Delete</MudButton>
+    <MudButton @onclick="@(() => HomePage())" Variant="Variant.Filled" Color="Color.Secondary">Cancel</MudButton>
+</MudPaper>
+
+@code {
+
+    [Parameter]
+    public Guid Id { get; set; }
+
+    //Supplier Object
+    protected Supplier supplier = new();
+
+    protected override async Task OnParametersSetAsync()
+    {
+        supplier = await HttpClient.GetFromJsonAsync<Supplier>($"api/Supplier/{Id}");
+    }
+
+    protected async Task RemoveSupplier(Guid id)
+    {
+        await HttpClient.DeleteAsync($"api/Supplier/{Id}");
+        Snackbar.Add("Deleted supplier", Severity.Success);
+        HomePage();
+
+    }
+
+    public void HomePage()
+    {
+        NavigationManager.NavigateTo("/supplierdetails");
+    }
+}

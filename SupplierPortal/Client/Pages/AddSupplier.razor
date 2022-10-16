@@ -1,0 +1,75 @@
+﻿@page "/supplier/add"
+@page "/supplier/edit/{Id:guid}"
+@using SupplierPortal.Shared.Models
+@inject HttpClient HttpClient
+@inject NavigationManager NavigationManager
+@using System.ComponentModel.DataAnnotations
+@inject ISnackbar Snackbar
+
+<PageTitle>Add Supplier</PageTitle>
+<MudText Typo="Typo.h3" GutterBottom="true">Add Supplier</MudText>
+
+<EditForm Model="@supplier" OnValidSubmit="SaveSupplier">
+    <DataAnnotationsValidator />
+    <MudGrid>
+        <MudItem xs="12" sm="7">
+            <MudCard>
+                <MudCardContent>
+                    <MudTextField Label="Name" 
+                                  @bind-Value="supplier.Name" For="@(() => supplier.Name)" />
+                    <MudTextField Label="Company" Class="mt-3"
+                                  @bind-Value="supplier.Company" For="@(() => supplier.Company)" />
+                    <MudTextField Label="Email"  Class="mt-3"
+                                  @bind-Value="supplier.Email" For="@(() => supplier.Email)"/>
+                </MudCardContent>
+                <MudCardActions>
+                    <MudPaper Class="d-flex flex-column flex-grow-1 gap-4" Elevation="0">
+                        <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" >@Title</MudButton>
+                        <MudButton @onclick = "@(() => HomePage())" Variant="Variant.Filled" Color="Color.Secondary" >Cancel</MudButton>
+                    </MudPaper>
+                </MudCardActions>
+            </MudCard>
+        </MudItem>
+    </MudGrid>
+</EditForm>
+
+@code {
+
+    [Parameter]
+    public Guid Id { get; set; }
+
+    protected string Title = "Add";
+
+    protected Supplier supplier = new();
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if(Id != Guid.Empty)
+        {
+            Title = "Edit";
+
+            supplier = await HttpClient.GetFromJsonAsync<Supplier>($"api/Supplier/{Id}");
+        }
+    }
+
+    protected async Task SaveSupplier()
+    {
+        if (Id != Guid.Empty)
+        {
+            await HttpClient.PutAsJsonAsync("api/Supplier", supplier);
+            Snackbar.Add("Updated Supplier", Severity.Success);
+        }
+        else
+        {
+            await HttpClient.PostAsJsonAsync("api/Supplier", supplier);
+            Snackbar.Add("Added Supplier", Severity.Success);
+        }
+
+        HomePage();
+    }
+
+    public void HomePage()
+    {
+        NavigationManager.NavigateTo("/supplierdetails");
+    }
+}

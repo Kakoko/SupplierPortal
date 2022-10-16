@@ -1,0 +1,47 @@
+﻿@page "/supplierdetails"
+@using SupplierPortal.Shared.Models
+@inject HttpClient HttpClient
+
+<PageTitle>Supplier Details</PageTitle>
+<MudText Typo="Typo.h3" GutterBottom="true">Supplier Details</MudText>
+
+@if(suppliers.Count <= 0)
+{
+    <MudProgressCircular Color="Color.Primary" Style="height:70px;width:70px;" Indeterminate="true" />
+}
+else
+{
+    
+    <MudTable Items="suppliers" Hover="true" Breakpoint="Breakpoint.Sm">
+        <HeaderContent>
+            <MudTh>Id</MudTh>
+            <MudTh>Name</MudTh>
+            <MudTh>Company</MudTh>
+            <MudTh>Email</MudTh>
+            <MudTh>Action</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="Id">@context.Id</MudTd>
+            <MudTd DataLabel="Name">@context.Name</MudTd>
+            <MudTd DataLabel="Company">@context.Company</MudTd>
+            <MudTd DataLabel="Email" >@context.Email</MudTd>
+            <MudTd DataLabel="">
+                <MudFab Href="@($"/supplier/edit/{context.Id}")" Color="Color.Primary" Size="Size.Small" StartIcon="@Icons.Material.Filled.Edit" />
+                <MudFab Href="@($"/supplier/delete/{context.Id}")" Color="Color.Secondary" Size="Size.Small" StartIcon="@Icons.Material.Filled.Delete" />
+            </MudTd>
+        </RowTemplate>
+    </MudTable>
+    <br/>
+    <MudPaper Class="d-flex flex-row-reverse flex-grow-1 gap-4" Elevation="0">
+        <MudFab Href="/supplier/add" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add" />
+    </MudPaper>
+}
+@code {
+    // We need to have a list of supplier
+    protected List<Supplier> suppliers = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        suppliers = await HttpClient.GetFromJsonAsync<List<Supplier>>("api/Supplier");
+    }
+}
